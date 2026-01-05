@@ -1,16 +1,59 @@
 const ProcurementRecord = require('../models/ProcurementRecord');
 const Upload = require('../models/Upload');
 const Dataset = require('../models/Dataset');
+const analyticsService = require('../services/analyticsService');
 
 // @desc    Get all procurement records
 // @route   GET /api/procurement-records
 // @access  Public (or Private)
+// @desc    Get Paginated & Filtered Records (Dataset Scoped)
 const getRecords = async (req, res) => {
     try {
-        const records = await ProcurementRecord.find({}).sort({ date: -1 });
-        res.json(records);
+        const activeDataset = await getActiveDataset();
+        if (!activeDataset) {
+            return res.json({ records: [], total: 0, active_dataset: null });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        const riskLevel = req.query.risk_level || '';
+
+        const query = { dataset_id: activeDataset._id };
+
+        if (search) {
+            const regex = new RegExp(search, 'i');
+            query.$or = [
+                { tender_no: regex },
+                { agency: regex },
+                { supplier_name: regex },
+                { tender_detail_status: regex }
+            ];
+        }
+
+        if (riskLevel) {
+            query.risk_level = riskLevel;
+        }
+
+        const records = await ProcurementRecord.find(query)
+            .sort({ risk_score: -1, awarded_amt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await ProcurementRecord.countDocuments(query);
+
+        res.json({
+            records,
+            total,
+            page,
+            pages: Math.ceil(total / limit),
+            active_dataset: activeDataset.dataset_name
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Get Records Error:', error);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
@@ -62,7 +105,7 @@ const getAnalyticsSummary = async (req, res) => {
         // 1. Get Totals
         const totalSpendAgg = await ProcurementRecord.aggregate([
             matchStage,
-            { $group: { _id: null, total: { $sum: "$amount" } } }
+            { $group: { _id: null, total: { $sum: "$awarded_amt" } } }
         ]);
         const totalSpend = totalSpendAgg[0]?.total || 0;
 
@@ -76,23 +119,23 @@ const getAnalyticsSummary = async (req, res) => {
 
         const getCount = (level) => riskCounts.find(r => r._id === level)?.count || 0;
 
-        // 3. Department Risk Distribution (for charts)
+        // 3. Department (Agency) Risk Distribution (for charts)
         const deptRiskDist = await ProcurementRecord.aggregate([
             { $match: { dataset_id: activeDataset._id, risk_level: "High" } },
-            { $group: { _id: "$department", count: { $sum: 1 } } },
+            { $group: { _id: "$agency", count: { $sum: 1 } } },
             { $sort: { count: -1 } }
         ]);
 
         // 4. Department Spend
         const deptSpend = await ProcurementRecord.aggregate([
             matchStage,
-            { $group: { _id: "$department", total: { $sum: "$amount" } } },
+            { $group: { _id: "$agency", total: { $sum: "$awarded_amt" } } },
             { $sort: { total: -1 } },
             { $limit: 5 }
         ]);
 
         // 5. Active Vendors Count
-        const uniqueVendors = await ProcurementRecord.distinct('vendor', { dataset_id: activeDataset._id });
+        const uniqueVendors = await ProcurementRecord.distinct('supplier_name', { dataset_id: activeDataset._id });
         const activeVendors = uniqueVendors.length;
 
         res.json({
@@ -121,8 +164,8 @@ const getProcurements = async (req, res) => {
         if (!activeDataset) return res.json([]);
 
         const records = await ProcurementRecord.find({ dataset_id: activeDataset._id })
-            .select('tender_id department vendor amount event_date risk_score risk_level risk_flags')
-            .sort({ risk_score: -1, amount: -1 }) // Sort by risk then amount
+            .select('tender_no agency supplier_name awarded_amt award_date risk_score risk_level risk_flags')
+            .sort({ risk_score: -1, awarded_amt: -1 }) // Sort by risk then amount
             .limit(100);
         res.json(records);
     } catch (error) {
@@ -145,4 +188,31 @@ const getRecordById = async (req, res) => {
     }
 };
 
-module.exports = { getRecords, getUploadHistory, getAnalyticsSummary, getProcurements, getRecordById, getActiveDatasetInfo };
+// @desc    Get Dashboard Charts Data
+// @route   GET /api/analytics/charts
+const getDashboardCharts = async (req, res) => {
+    try {
+        const activeDataset = await getActiveDataset();
+        if (!activeDataset) return res.json({ agencySpend: [], supplierDominance: [], riskProfile: [] });
+
+        const [agencySpend, supplierDominance, riskProfile] = await Promise.all([
+            analyticsService.getAgencySpend(activeDataset._id),
+            analyticsService.getSupplierDominance(activeDataset._id),
+            analyticsService.getRiskProfile(activeDataset._id)
+        ]);
+
+        res.json({ agencySpend, supplierDominance, riskProfile });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = {
+    getRecords,
+    getUploadHistory,
+    getAnalyticsSummary,
+    getProcurements,
+    getRecordById,
+    getActiveDatasetInfo,
+    getDashboardCharts
+};

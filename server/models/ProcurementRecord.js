@@ -1,40 +1,44 @@
 const mongoose = require('mongoose');
 
 const procurementRecordSchema = new mongoose.Schema({
-    tender_id: {
+    dataset_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dataset',
+        index: true,
+        required: true
+    },
+    tender_no: {
         type: String,
         required: true,
         index: true
     },
-    dataset_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Dataset',
+    agency: {
+        type: String, // Was department
+        required: true,
         index: true
     },
-    department: {
-        type: String,
+    supplier_name: {
+        type: String, // Was vendor
+        required: true,
+        index: true
+    },
+    awarded_amt: {
+        type: Number, // Was amount
         required: true
     },
-    vendor: {
-        type: String,
-        required: true
-    },
-    amount: {
-        type: Number,
-        required: true
-    },
-    event_date: {
+    award_date: { // Was event_date
         type: Date,
         required: true
     },
-    uploaded_at: {
-        type: Date,
-        default: Date.now
+    tender_detail_status: {
+        type: String,
+        required: false // Might be optional
     },
     source_file_name: {
         type: String,
         required: true
     },
+    // Risk Analysis Fields
     risk_score: {
         type: Number,
         default: 0
@@ -44,8 +48,11 @@ const procurementRecordSchema = new mongoose.Schema({
         enum: ['Low', 'Medium', 'High'],
         default: 'Low'
     },
-    risk_flags: [String],
+    risk_flags: [String], // e.g. ["High Amount", "Frequent Winner"]
     risk_explanation: String
 }, { timestamps: true });
+
+// Compound index for efficient querying
+procurementRecordSchema.index({ dataset_id: 1, risk_score: -1 });
 
 module.exports = mongoose.model('ProcurementRecord', procurementRecordSchema);

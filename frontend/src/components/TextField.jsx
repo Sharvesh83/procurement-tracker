@@ -24,9 +24,7 @@ export default function TextField({
                 <label htmlFor={id} className="text-field-label">
                     {label}
                 </label>
-                <fieldset className="text-field-outline">
-                    <legend><span>{label}</span></legend>
-                </fieldset>
+                <div className="text-field-outline" aria-hidden="true"></div>
             </div>
             {helperText && <span className="text-field-helper">{helperText}</span>}
         </div>

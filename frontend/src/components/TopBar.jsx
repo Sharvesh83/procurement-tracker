@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Menu, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './TopBar.css';
+import './TopBarOverrides.css';
 
 export default function TopBar({ toggleSidebar }) {
     const { user, logout } = useAuth();
@@ -29,8 +30,18 @@ export default function TopBar({ toggleSidebar }) {
                     </div>
 
                     {showMenu && (
-                        <div className="user-dropdown">
-                            <button className="dropdown-item text-red-600" onClick={logout}>
+                        <div className="user-dropdown" role="menu">
+                            <div className="user-dropdown-header">
+                                <p className="user-dropdown-label">Signed in as</p>
+                                <p className="user-dropdown-name">{userName}</p>
+                            </div>
+                            <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                    logout();
+                                    setShowMenu(false);
+                                }}
+                            >
                                 <LogOut size={16} className="mr-2" />
                                 Logout
                             </button>

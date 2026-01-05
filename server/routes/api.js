@@ -19,9 +19,11 @@ router.get('/procurement-records', getRecords);
 router.get('/upload-history', getUploadHistory);
 
 // Analytics Routes
-const { getAnalyticsSummary, getProcurements } = require('../controllers/recordController');
+// Analytics Routes
+const { getAnalyticsSummary, getProcurements, getDashboardCharts } = require('../controllers/recordController');
 router.get('/analytics/summary', getAnalyticsSummary);
 router.get('/analytics/procurements', getProcurements);
+router.get('/analytics/charts', getDashboardCharts);
 
 // Deprecated (Left for safety during migration, verify if safe to remove later)
 // router.get('/dashboard-stats', getDashboardStats);

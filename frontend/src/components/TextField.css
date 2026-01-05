@@ -66,6 +66,7 @@
 }
 
 /* Focus & Filled State */
+/* Focus & Filled State */
 .text-field-input:focus~.text-field-outline,
 .text-field-input:not(:placeholder-shown)~.text-field-outline {
     border-color: var(--md-sys-color-primary);
@@ -75,41 +76,18 @@
 .text-field-input:focus~.text-field-label,
 .text-field-input:not(:placeholder-shown)~.text-field-label {
     top: -10px;
-    left: 12px;
+    left: 14px;
     font-size: 12px;
     color: var(--md-sys-color-primary);
     background-color: var(--md-sys-color-surface);
-    /* Mask line? Or use legend mask */
     padding: 0 4px;
-    /* Mask approach is easier if background is solid */
-
-    /* Using Legend Mask approach below instead of background color (better for transparent inputs) */
-    /* Reset values for legend approach: */
-    top: 35%;
-    /* Center it? No wait. */
-    transform: translateY(-28px) scale(0.75);
-    /* Cleaner transform */
-    transform-origin: left top;
-    color: var(--md-sys-color-primary);
-    background: transparent;
-    padding: 0;
+    z-index: 2;
+    /* Ensure label is above outline */
 }
 
-/* Legend Mask Fix */
-.text-field-input:focus~.text-field-outline legend,
-.text-field-input:not(:placeholder-shown)~.text-field-outline legend {
-    max-width: 100%;
-    /* Reveal legend gap */
-    visibility: visible;
-}
-
-/* Adjust label to align with legend gap */
-.text-field-input:focus~.text-field-label,
-.text-field-input:not(:placeholder-shown)~.text-field-label {
-    top: -10px;
-    left: 14px;
-    transform: none;
-    font-size: 12px;
+/* Hide Legend Mask approach to avoid conflicts */
+.text-field-outline legend {
+    display: none;
 }
 
 /* Error State */

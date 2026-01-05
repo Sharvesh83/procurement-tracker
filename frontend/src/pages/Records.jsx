@@ -1,99 +1,191 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
-import TextField from '../components/TextField';
-import { Search } from 'lucide-react';
-import './Records.css';
 
-// Mock Data
-const MOCK_DATA = [
-    { id: 'TND-2025-001', department: 'Infrastructure', vendor: 'BuildCorp Ltd.', amount: '$1,250,000', date: '2025-01-15', status: 'Completed' },
-    { id: 'TND-2025-002', department: 'Health', vendor: 'MediCare Supplies', amount: '$45,000', date: '2025-01-18', status: 'Active' },
-    { id: 'TND-2025-003', department: 'Education', vendor: 'EdTech Solutions', amount: '$320,000', date: '2025-01-20', status: 'Pending' },
-    { id: 'TND-2025-004', department: 'Transport', vendor: 'City Transit Inc.', amount: '$850,000', date: '2025-01-22', status: 'Active' },
-    { id: 'TND-2025-005', department: 'IT Services', vendor: 'CloudNine Systems', amount: '$120,000', date: '2025-01-25', status: 'Completed' },
-    { id: 'TND-2025-006', department: 'Parks', vendor: 'GreenGrow', amount: '$15,000', date: '2025-01-28', status: 'Active' },
-    { id: 'TND-2025-007', department: 'Sanitation', vendor: 'CleanCity Co.', amount: '$210,000', date: '2025-02-01', status: 'Pending' },
-];
+import { Search, Filter, ChevronLeft, ChevronRight, AlertCircle, X, ChevronDown } from 'lucide-react';
+import './Dashboard.css'; // Reusing dashboard styles for table
+import Button from '../components/Button';
+import './Records.css';
+import './RecordsOverrides.css';
 
 export default function Records() {
-    const navigate = useNavigate();
-    const [data, setData] = useState([]);
+    const [records, setRecords] = useState([]);
+    const [metadata, setMetadata] = useState({ total: 0, page: 1, pages: 1 });
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [page, setPage] = useState(1);
+    const [search, setSearch] = useState('');
+    const [riskLevel, setRiskLevel] = useState('');
 
-    // Fetch Records
-    React.useEffect(() => {
-        fetch('/api/procurement-records')
-            .then(res => res.json())
-            .then(records => {
-                setData(records);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Failed to fetch records:', err);
-                setLoading(false);
+    const fetchRecords = async (page = 1) => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams({
+                page,
+                limit: 10,
+                search,
+                risk_level: riskLevel
             });
-    }, []);
-
-    // Filter logic
-    const filteredData = data.filter(row =>
-        row.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.vendor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.tender_id?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const columns = [
-        { key: 'tender_id', label: 'Tender ID' },
-        { key: 'department', label: 'Department' },
-        { key: 'vendor', label: 'Vendor' },
-        { key: 'amount', label: 'Amount', align: 'right' },
-        {
-            key: 'event_date',
-            label: 'Date',
-            render: (date) => new Date(date).toLocaleDateString()
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            render: (value) => {
-                return <span className="badge badge-green">Synced</span>;
-            }
+            const response = await fetch(`/api/procurement-records?${params}`);
+            const data = await response.json();
+            setRecords(data.records);
+            setMetadata({ total: data.total, page: data.page, pages: data.pages });
+        } catch (error) {
+            console.error('Error fetching records:', error);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchRecords(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search, riskLevel]);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= metadata.pages) {
+            fetchRecords(newPage);
+        }
+    };
+
+    const getRiskClass = (level) => {
+        switch (level) {
+            case 'High': return 'risk-pill high';
+            case 'Medium': return 'risk-pill medium';
+            default: return 'risk-pill low';
+        }
+    };
 
     return (
-        <div className="records-container">
-            <div className="records-header">
+        <div className="dashboard-container">
+            <div className="dashboard-header">
                 <div>
-                    <h2>Procurement Records</h2>
-                    <p>Manage and monitor all tender activities.</p>
+                    <h1>Procurement Records</h1>
+                    <p>Search and Audit Contracts</p>
                 </div>
-                <div className="records-search">
-                    <TextField
-                        label="Search Records..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        id="search"
+            </div>
+
+            {/* Toolbar */}
+            <div className="records-toolbar">
+                <div className="search-field">
+                    <Search size={18} className="search-icon" />
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="Search by ID, agency, or vendor"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                     />
+                    {search && (
+                        <button
+                            type="button"
+                            className="clear-btn"
+                            aria-label="Clear search"
+                            onClick={() => setSearch('')}
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
+
+                <div className="filters">
+                    <div className="select">
+                        <Filter size={16} className="leading-icon" />
+                        <select
+                            value={riskLevel}
+                            onChange={(e) => setRiskLevel(e.target.value)}
+                        >
+                            <option value="">All risks</option>
+                            <option value="High">High risk</option>
+                            <option value="Medium">Medium risk</option>
+                            <option value="Low">Low risk</option>
+                        </select>
+                        <ChevronDown size={14} className="trailing-icon" />
+                    </div>
                 </div>
             </div>
 
-            <DataTable
-                columns={columns}
-                data={filteredData}
-                onRowClick={(row) => navigate(`/records/${row._id}`)}
-            />
-
-            <div className="pagination">
-                <span>Showing {filteredData.length} records</span>
-                <div className="pagination-controls">
-                    <button className="page-btn" disabled>Previous</button>
-                    <button className="page-btn active">1</button>
-                    <button className="page-btn">Next</button>
-                </div>
+            {/* Table */}
+            <div className="table-wrapper">
+                {loading ? (
+                    <div className="p-8 text-center text-gray-500">Loading records...</div>
+                ) : records.length > 0 ? (
+                    <table className="risk-table">
+                        <thead>
+                            <tr>
+                                <th>Tender No</th>
+                                <th>Agency</th>
+                                <th>Supplier</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {records.map((record) => (
+                                <tr key={record._id} className="hover:bg-gray-50">
+                                    <td className="font-mono text-xs">{record.tender_no}</td>
+                                    <td>{record.agency}</td>
+                                    <td className="font-medium">{record.supplier_name}</td>
+                                    <td>${record.awarded_amt.toLocaleString()}</td>
+                                    <td className="text-sm text-gray-500">{new Date(record.award_date).toLocaleDateString()}</td>
+                                    <td>
+                                        <span className={getRiskClass(record.risk_level)}>
+                                            {record.risk_level}
+                                        </span>
+                                        {record.risk_level === 'High' && (
+                                            <span className="ml-2 text-xs text-red-600 bg-red-50 px-2 py-1 rounded inline-block">
+                                                {record.risk_flags[0]}
+                                            </span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <div className="empty-state">
+                        <div className="empty-icon">
+                            <AlertCircle size={28} />
+                        </div>
+                        <div className="empty-text">
+                            <h3>No records found</h3>
+                            <p>Try a different search or adjust your filters.</p>
+                        </div>
+                        <div className="empty-actions">
+                            <Button variant="outlined" onClick={() => { setSearch(''); setRiskLevel(''); fetchRecords(1); }}>
+                                Reset filters
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Pagination */}
+            {!loading && records.length > 0 && (
+                <div className="flex justify-between items-center mt-6">
+                    <span className="text-sm text-gray-500">
+                        Page {metadata.page} of {metadata.pages}
+                    </span>
+                    <div className="flex gap-2">
+                        <button
+                            className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                            onClick={() => handlePageChange(metadata.page - 1)}
+                            disabled={metadata.page === 1}
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <button
+                            className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                            onClick={() => handlePageChange(metadata.page + 1)}
+                            disabled={metadata.page === metadata.pages}
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

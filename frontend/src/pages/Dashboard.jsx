@@ -39,6 +39,10 @@ export default function Dashboard() {
         fetchAnalytics();
     };
 
+    const summary = stats;
+    const riskData = stats ? getRiskData(stats) : [];
+    const charts = { agencySpend: stats?.agency_spend || [] };
+
     if (loading && !stats) return <div className="p-8">Loading Analytics...</div>;
 
     return (
@@ -62,108 +66,96 @@ export default function Dashboard() {
                 </div>
             ) : (
                 <>
-                    {/* Header Info is now in Control Panel, but we keep Risk Badge here or move it? 
-                        Let's keep the risk summary visible below the panel. 
-                    */}
-                    <div className="risk-banner mb-6">
-                        {stats.high_risk_count > 0 ? (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-center gap-2">
-                                <AlertTriangle size={20} />
-                                <span className="font-semibold">Attention Needed:</span>
-                                {stats.high_risk_count} High Risk contracts detected in this dataset.
-                            </div>
-                        ) : (
-                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center gap-2">
-                                <Activity size={20} />
-                                <span className="font-semibold">System Healthy:</span>
-                                No high risk contracts found.
-                            </div>
-                        )}
+                    <div className="dashboard-header">
+                        <div>
+                            <h1>Fraud Analytics Dashboard</h1>
+                            <p>{summary?.dataset_name ? `Active Dataset: ${summary.dataset_name}` : 'No Active Dataset'}</p>
+                        </div>
+                        <div className="text-right text-sm text-gray-500">
+                            Last Updated: {summary?.uploaded_at ? new Date(summary.uploaded_at).toLocaleDateString() : '-'}
+                        </div>
                     </div>
 
-                    {/* Metric Cards Grid */}
+                    {/* Dataset Control */}
+                    <DatasetControlPanel onUploadSuccess={fetchData} />
+
+                    {/* Metrics */}
                     <div className="metrics-grid">
                         <MetricCard
                             title="Total Spend"
-                            value={`$${(stats.total_spend / 1000000).toFixed(1)}M`}
-                            trend="vs last upload"
+                            value={`$${(summary?.total_spend || 0).toLocaleString()}`}
                             icon={DollarSign}
+                            trend="Based on active data"
+                            color="blue"
                         />
                         <MetricCard
-                            title="Total Records"
-                            value={stats.total_records}
-                            trend="Rows Processed"
+                            title="Total Contracts"
+                            value={summary?.total_records || 0}
                             icon={FileText}
+                            trend="Count"
+                            color="indigo"
                         />
                         <MetricCard
-                            title="High Risk Contracts"
-                            value={stats.high_risk_count}
-                            trend={stats.high_risk_count > 0 ? "Critical Issues Found" : "System Healthy"}
+                            title="High Risk Records"
+                            value={summary?.high_risk_count || 0}
                             icon={AlertTriangle}
-                            trendDown={false}
+                            trend="Requires Audit"
+                            color="red"
                         />
                         <MetricCard
                             title="Active Vendors"
-                            value={stats.active_vendors || 0}
-                            icon={Activity}
+                            value={summary?.active_vendors || 0}
+                            icon={Users}
+                            trend="Distinct Suppliers"
+                            color="purple"
                         />
                     </div>
 
-                    {/* Charts Section */}
+                    {/* Charts Grid */}
                     <div className="charts-grid">
-                        {/* Risk Distribution Pie */}
-                        <div className="chart-card">
-                            <h3>Risk Distribution</h3>
-                            <div style={{ width: '100%', height: 300 }}>
-                                <ResponsiveContainer>
-                                    <PieChart>
-                                        <Pie
-                                            data={getRiskData(stats)}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {getRiskData(stats).map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[entry.name] || ['#8884d8', '#82ca9d'][index % 2]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div className="chart-legend">
-                                    {getRiskData(stats).map(d => (
-                                        <div key={d.name} className="legend-item">
-                                            <span className="dot" style={{ background: COLORS[d.name] }}></span>
-                                            {d.name}: {d.value}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Department Spend Bar */}
+                        {/* Agency Spend Bar Chart */}
                         <div className="chart-card">
-                            <h3>Top Dept Spend</h3>
+                            <h3>Top Agencies by Spend</h3>
                             <div style={{ width: '100%', height: 300 }}>
                                 <ResponsiveContainer>
-                                    <BarChart data={stats.department_spend.map(d => ({ name: d._id, amount: d.total }))}>
-                                        <XAxis dataKey="name" fontSize={12} tick={{ fill: '#666' }} />
-                                        <YAxis fontSize={12} tick={{ fill: '#666' }} />
-                                        <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                                        <Bar dataKey="amount" fill="#00796B" radius={[4, 4, 0, 0]} />
+                                    <BarChart data={charts.agencySpend} layout="vertical" margin={{ left: 40 }}>
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                        <XAxis type="number" tickFormatter={formatCurrency} />
+                                        <YAxis dataKey="_id" type="category" width={120} tick={{ fontSize: 12 }} />
+                                        <Tooltip formatter={(val) => `$${val.toLocaleString()}`} />
+                                        <Bar dataKey="total_spend" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Spend" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Top Risky Procurements Table */}
-                    <RiskyTable key={stats.uploaded_at} />
-                    {/* key ensures table remounts/refetches on new upload */}
+                        {/* Risk Distribution Pie */}
+                        <div className="chart-card">
+                            <h3>Fraud Risk Distribution</h3>
+                            <div style={{ width: '100%', height: 300 }}>
+                                <ResponsiveContainer>
+                                    <PieChart>
+                                        <Pie
+                                            data={riskData}
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {riskData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.name.includes('Low') ? COLORS[0] : entry.name.includes('Medium') ? COLORS[1] : COLORS[2]} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Top Risky Procurements Table */}
+                            <RiskyTable key={stats.uploaded_at} />
+                            {/* key ensures table remounts/refetches on new upload */}
+                        </div>
+                    </div>
                 </>
             )}
         </div>
@@ -216,8 +208,8 @@ function RiskyTable() {
                 <table className="risk-table">
                     <thead>
                         <tr>
-                            <th>Tender ID</th>
-                            <th>Vendor</th>
+                            <th>Tender No</th>
+                            <th>Supplier</th>
                             <th>Amount</th>
                             <th>Risk Score</th>
                             <th>Flags</th>
@@ -226,15 +218,15 @@ function RiskyTable() {
                     <tbody>
                         {records.map(record => (
                             <tr key={record._id}>
-                                <td>{record.tender_id}</td>
-                                <td>{record.vendor}</td>
-                                <td>${record.amount.toLocaleString()}</td>
+                                <td>{record.tender_no}</td>
+                                <td>{record.supplier_name}</td>
+                                <td>${record.awarded_amt?.toLocaleString() || '0'}</td>
                                 <td>
-                                    <span className={`risk-pill ${record.risk_level.toLowerCase()}`}>
+                                    <span className={`risk-pill ${record.risk_level?.toLowerCase() || 'low'}`}>
                                         {record.risk_score} ({record.risk_level})
                                     </span>
                                 </td>
-                                <td>{record.risk_flags.join(', ')}</td>
+                                <td>{record.risk_flags?.join(', ')}</td>
                             </tr>
                         ))}
                     </tbody>

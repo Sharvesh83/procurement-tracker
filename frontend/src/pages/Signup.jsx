@@ -117,13 +117,6 @@ export default function Signup() {
                             >
                                 Analyst
                             </button>
-                            <button
-                                type="button"
-                                className={`role-chip ${formData.role === 'public' ? 'active' : ''}`}
-                                onClick={() => handleRoleChange('public')}
-                            >
-                                Public
-                            </button>
                         </div>
                     </div>
 
