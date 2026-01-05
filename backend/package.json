@@ -1,0 +1,36 @@
+{
+  "name": "procurement-tracker-backend",
+  "version": "1.0.0",
+  "description": "Corruption-Resistant Public Procurement Monitoring System - Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "mock": "node mock-server.js",
+    "seed": "node scripts/seedData.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "procurement",
+    "monitoring",
+    "audit",
+    "tamper-evident"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "uuid": "^9.0.1",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  }
+}
