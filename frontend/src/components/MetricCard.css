@@ -1,0 +1,90 @@
+.metric-card {
+    background-color: #FFFFFF;
+    padding: 24px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card:hover::before {
+    background: var(--md-sys-color-primary);
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.metric-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-icon {
+    color: var(--md-sys-color-primary);
+    background: rgba(0, 77, 64, 0.08);
+    /* Teal with opacity */
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.metric-trend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.metric-trend.up {
+    color: #2E7D32;
+    /* Green */
+    background: #E8F5E9;
+    padding: 4px 10px;
+    border-radius: 20px;
+    align-self: flex-start;
+}
+
+.metric-trend.down {
+    color: #C62828;
+    /* Red */
+    background: #FFEBEE;
+    padding: 4px 10px;
+    border-radius: 20px;
+    align-self: flex-start;
+}

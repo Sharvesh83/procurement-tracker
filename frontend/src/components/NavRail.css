@@ -1,0 +1,129 @@
+/* NavRail Component Styles */
+.nav-rail {
+    background-color: var(--md-sys-color-surface);
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    height: calc(100vh - 64px);
+    /* Desktop default: below TopBar */
+    position: sticky;
+    top: 64px;
+    transition: width 0.3s cubic-bezier(0.2, 0.0, 0, 1), transform 0.3s cubic-bezier(0.2, 0.0, 0, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+}
+
+/* Desktop States */
+.nav-rail.open {
+    width: 280px;
+}
+
+.nav-rail.closed {
+    width: 80px;
+}
+
+.nav-content {
+    padding: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-md);
+    height: 56px;
+    border-radius: var(--md-sys-shape-corner-full);
+    text-decoration: none;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.nav-item:hover:not(.disabled) {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+}
+
+.nav-item.active {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    font-weight: 500;
+}
+
+.nav-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-icon-container {
+    min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-sm);
+}
+
+.nav-label {
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+/* Closed State Adjustments (Desktop Rail) */
+.nav-rail.closed .nav-label {
+    opacity: 0;
+    width: 0;
+    display: none;
+    /* Semantic hide */
+}
+
+.nav-rail.closed .nav-item {
+    padding: 0;
+    justify-content: center;
+}
+
+.nav-rail.closed .nav-icon-container {
+    margin-right: 0;
+}
+
+/* Mobile Overrides matching MainLayout logic */
+@media (max-width: 768px) {
+    .nav-rail {
+        height: 100vh;
+        top: 0;
+        border-right: none;
+    }
+
+    /* On mobile, "Closed" means hidden off-screen (handled by MainLayout)
+       But "Open" means full drawer width */
+    .nav-rail.open {
+        width: 280px;
+    }
+
+    /* When open on mobile, it looks like a normal drawer, so no special overrides needed here 
+       except assuring the label is visible (which it is by default .open rules) */
+
+    .nav-rail.closed {
+        width: 280px;
+        /* Maintain width for slide effect */
+    }
+
+    /* Ensure internal items look "Open" even if the rail is technically closed/sliding */
+    .nav-rail.closed .nav-label {
+        opacity: 1;
+        width: auto;
+        display: block;
+    }
+
+    .nav-rail.closed .nav-item {
+        padding: 0 var(--space-md);
+        justify-content: flex-start;
+    }
+
+    .nav-rail.closed .nav-icon-container {
+        margin-right: var(--space-sm);
+    }
+}

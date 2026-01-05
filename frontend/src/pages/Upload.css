@@ -1,0 +1,142 @@
+.upload-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.upload-header {
+    margin-bottom: 16px;
+}
+
+.upload-header h2 {
+    font-family: var(--md-sys-typescale-primary-font);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+}
+
+.upload-header p {
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: 8px;
+}
+
+/* File Preview Card */
+.file-preview-card {
+    background-color: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 24px;
+    box-shadow: var(--md-sys-elevation-level-2);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-info-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.file-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+}
+
+.file-size {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.remove-btn:hover {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-error);
+}
+
+/* Progress Bar */
+.upload-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.progress-track {
+    height: 8px;
+    background-color: var(--md-sys-color-surface-variant);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--md-sys-color-primary);
+    border-radius: 4px;
+    transition: width 0.3s ease-out;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: var(--md-sys-color-primary);
+    align-self: flex-end;
+}
+
+.upload-success-msg {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--risk-low-bg);
+    color: var(--risk-low-text);
+    padding: 12px;
+    border-radius: var(--md-sys-shape-corner-small);
+    font-weight: 500;
+}
+
+.upload-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}

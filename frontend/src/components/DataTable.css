@@ -1,0 +1,97 @@
+.table-container {
+    overflow-x: auto;
+    background-color: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-medium);
+    box-shadow: var(--md-sys-elevation-level-1);
+}
+
+.md-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    /* Ensure scroll on small screens */
+}
+
+.md-table th {
+    text-align: left;
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    background-color: var(--md-sys-color-surface);
+    /* Sticky header suppport if added */
+    white-space: nowrap;
+}
+
+.md-table td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    transition: background-color 0.2s;
+}
+
+.md-table tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table tbody tr {
+    cursor: pointer;
+}
+
+.md-table tbody tr:hover td {
+    background-color: var(--md-sys-color-surface-variant);
+    /* very subtle hover */
+}
+
+.md-table tbody tr:hover .row-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+.align-right {
+    text-align: right;
+}
+
+.action-col {
+    width: 48px;
+    padding-right: 16px;
+    text-align: center;
+}
+
+.row-arrow {
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0;
+    transition: all 0.2s;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Badge Utility Classes for Cells */
+.badge {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-green {
+    background-color: var(--risk-low-bg);
+    color: var(--risk-low-text);
+}
+
+.badge-amber {
+    background-color: var(--risk-medium-bg);
+    color: var(--risk-medium-text);
+}
+
+.badge-red {
+    background-color: var(--risk-high-bg);
+    color: var(--risk-high-text);
+}

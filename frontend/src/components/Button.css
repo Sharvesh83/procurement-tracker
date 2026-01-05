@@ -1,0 +1,70 @@
+.md-btn {
+    position: relative;
+    border-radius: var(--md-sys-shape-corner-full);
+    border: none;
+    padding: 0 24px;
+    height: 40px;
+    font-family: var(--md-sys-typescale-primary-font);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--md-sys-motion-easing-standard);
+    isolation: isolate;
+    background: transparent;
+    /* Reset */
+}
+
+.md-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+}
+
+/* Filled / Primary */
+.md-btn-filled {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: var(--md-sys-elevation-level-1);
+}
+
+.md-btn-filled:hover:not(:disabled) {
+    box-shadow: var(--md-sys-elevation-level-2);
+}
+
+.md-btn-layer {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: -1;
+}
+
+.md-btn:hover .md-btn-layer {
+    opacity: 0.08;
+}
+
+.md-btn:active .md-btn-layer {
+    opacity: 0.12;
+}
+
+/* Outlined */
+.md-btn-outlined {
+    border: 1px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-primary);
+}
+
+.md-btn-outlined:hover:not(:disabled) {
+    background-color: transparent;
+    border-color: var(--md-sys-color-primary);
+}
+
+/* Text */
+.md-btn-text {
+    color: var(--md-sys-color-primary);
+    padding: 0 12px;
+}
