@@ -9,10 +9,13 @@ export default function Upload() {
     const [status, setStatus] = useState('idle'); // idle, uploading, success, error
     const [progress, setProgress] = useState(0);
 
+    const [errorMessage, setErrorMessage] = useState('');
+
     const handleFileSelected = (selectedFile) => {
         setFile(selectedFile);
         setStatus('idle');
         setProgress(0);
+        setErrorMessage('');
     };
 
     const handleUpload = async () => {
@@ -20,6 +23,7 @@ export default function Upload() {
 
         setStatus('uploading');
         setProgress(0);
+        setErrorMessage('');
 
         const formData = new FormData();
         formData.append('dataset', file);
@@ -45,12 +49,12 @@ export default function Upload() {
                 console.log(result);
             } else {
                 setStatus('error');
-                alert(result.message || 'Upload failed');
+                setErrorMessage(result.message || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
             setStatus('error');
-            alert('Network error during upload');
+            setErrorMessage('Network error: Server is unreachable. Please ensure backend is running.');
         }
     };
 
@@ -58,6 +62,7 @@ export default function Upload() {
         setFile(null);
         setStatus('idle');
         setProgress(0);
+        setErrorMessage('');
     };
 
     return (
@@ -102,13 +107,20 @@ export default function Upload() {
                         </div>
                     )}
 
+                    {status === 'error' && (
+                        <div className="p-3 mt-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-start gap-2">
+                            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                            <span>{errorMessage}</span>
+                        </div>
+                    )}
+
                     <div className="upload-actions">
-                        {status === 'idle' && (
+                        {status === 'idle' || status === 'error' ? (
                             <>
                                 <Button variant="outlined" onClick={handleRemoveFile}>Cancel</Button>
                                 <Button variant="filled" onClick={handleUpload}>Start Upload</Button>
                             </>
-                        )}
+                        ) : null}
                         {status === 'success' && (
                             <Button variant="filled" onClick={() => setFile(null)}>Upload Another</Button>
                         )}
