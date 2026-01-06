@@ -15,8 +15,7 @@ export default function NavRail({ isOpen }) {
         {
             icon: UploadCloud,
             label: 'Upload Dataset',
-            path: '/upload',
-            hidden: role === 'public'
+            path: '/upload'
         },
 
     ].filter(item => !item.hidden);

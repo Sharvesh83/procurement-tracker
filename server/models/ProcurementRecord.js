@@ -45,11 +45,16 @@ const procurementRecordSchema = new mongoose.Schema({
     },
     risk_level: {
         type: String,
-        enum: ['Low', 'Medium', 'High'],
-        default: 'Low'
+        enum: ['Low', 'Medium', 'High', 'Pending'],
+        default: 'Pending'
     },
     risk_flags: [String], // e.g. ["High Amount", "Frequent Winner"]
-    risk_explanation: String
+    risk_explanation: String,
+    priority: {
+        type: String,
+        enum: ['High', 'Normal'],
+        default: 'Normal'
+    }
 }, { timestamps: true });
 
 // Compound index for efficient querying
