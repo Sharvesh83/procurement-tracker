@@ -206,3 +206,32 @@ export const dashboardAPI = {
     getHighRiskTenders: (limit = 20) =>
         request(`/dashboard/high-risk-tenders?limit=${limit}`)
 };
+
+/**
+ * System API
+ */
+export const systemAPI = {
+    checkHealth: () => request('/health')
+};
+
+/**
+ * Upload API
+ */
+export const uploadAPI = {
+    analyze: (formData) =>
+        request('/upload/analyze', {
+            method: 'POST',
+            body: formData,
+            // Don't set Content-Type header manually for FormData, let browser handle it
+            headers: {}
+        }),
+
+    getDatasets: () =>
+        request('/upload/datasets'),
+
+    getDataset: (id) =>
+        request(`/upload/datasets/${id}`),
+
+    deleteDataset: (id) =>
+        request(`/upload/datasets/${id}`, { method: 'DELETE' })
+};

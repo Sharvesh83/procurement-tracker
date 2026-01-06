@@ -22,7 +22,12 @@ const app = express();
 
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.options('*', cors());
 app.use(express.json());
 
 // Request logging
@@ -209,18 +214,36 @@ app.post('/api/auth/register', (req, res) => {
 });
 
 app.get('/api/auth/me', (req, res) => {
-    const user = users[0];
-    res.json({
-        success: true,
-        data: {
-            user: {
-                _id: user._id,
-                username: user.username,
-                role: user.role,
-                fullName: user.fullName
-            }
+    try {
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+        if (!token) {
+            return res.status(401).json({ success: false, error: 'UNAUTHORIZED', message: 'Missing token' });
         }
-    });
+
+        const payload = jwt.verify(token, JWT_SECRET);
+        const user = users.find(u => u._id === payload.userId);
+
+        if (!user) {
+            return res.status(401).json({ success: false, error: 'UNAUTHORIZED', message: 'Invalid token user' });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    role: user.role,
+                    fullName: user.fullName,
+                    email: user.email
+                }
+            }
+        });
+    } catch (e) {
+        return res.status(401).json({ success: false, error: 'UNAUTHORIZED', message: 'Invalid token' });
+    }
 });
 
 // ============================================
@@ -567,9 +590,90 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'healthy',
         mode: 'MOCK',
+        db_status: 'mocked',
         timestamp: new Date().toISOString(),
         disclaimer: 'This is a MOCK server for testing. No real data is being used.'
     });
+});
+
+// ============================================
+// UPLOAD ROUTES
+// ============================================
+
+const multer = require('multer');
+const { parseFile, validateRecords, generateSummary } = require('./services/fileParser');
+const { analyzeData } = require('./services/aiAnalysis');
+
+const storage = multer.memoryStorage();
+const uploadMiddleware = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+
+const uploadedDatasets = new Map();
+
+app.post('/api/upload/analyze', uploadMiddleware.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'NO_FILE', message: 'No file uploaded' });
+        }
+
+        const { buffer, mimetype, originalname } = req.file;
+
+        let records;
+        try {
+            records = parseFile(buffer, mimetype, originalname);
+        } catch (e) {
+            return res.status(400).json({ success: false, error: 'PARSE_ERROR', message: e.message });
+        }
+
+        const { validRecords, errors, warnings } = validateRecords(records);
+        if (validRecords.length === 0) {
+            return res.status(400).json({ success: false, error: 'NO_VALID_RECORDS', message: 'No valid records found' });
+        }
+
+        const summary = generateSummary(validRecords);
+        const analysis = await analyzeData(summary, validRecords);
+
+        const datasetId = `DS-${Date.now()}`;
+        uploadedDatasets.set(datasetId, {
+            id: datasetId,
+            filename: originalname,
+            uploaded_at: new Date().toISOString(),
+            records: validRecords,
+            summary,
+            analysis
+        });
+
+        res.json({
+            success: true,
+            message: 'File analyzed successfully',
+            data: {
+                dataset_id: datasetId,
+                filename: originalname,
+                summary,
+                validation: { total_records: records.length, valid_records: validRecords.length, errors: errors.length },
+                analysis
+            }
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ success: false, error: 'ANALYSIS_FAILED', message: error.message });
+    }
+});
+
+app.get('/api/upload/datasets', (req, res) => {
+    const datasets = Array.from(uploadedDatasets.values()).map(ds => ({
+        id: ds.id,
+        filename: ds.filename,
+        uploaded_at: ds.uploaded_at,
+        record_count: ds.records.length,
+        summary: { tenders: ds.summary.unique_tenders, departments: ds.summary.unique_departments }
+    }));
+    res.json({ success: true, data: { datasets, count: datasets.length } });
+});
+
+app.get('/api/upload/datasets/:id', (req, res) => {
+    const dataset = uploadedDatasets.get(req.params.id);
+    if (!dataset) return res.status(404).json({ success: false, error: 'NOT_FOUND' });
+    res.json({ success: true, data: dataset });
 });
 
 // Block dangerous methods

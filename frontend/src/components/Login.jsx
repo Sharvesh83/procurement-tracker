@@ -4,18 +4,45 @@
  * Simple authentication form for Procurement Officers and Auditors.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, User, Lock, AlertCircle, Eye } from 'lucide-react';
+import { Shield, User, Lock, AlertCircle, Eye, Activity } from 'lucide-react';
 import { useAuth } from '../App';
+import { systemAPI, authAPI } from '../services/api';
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [systemStatus, setSystemStatus] = useState({ online: false, message: '' });
     const navigate = useNavigate();
     const { login } = useAuth();
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const response = await systemAPI.checkHealth();
+                if (response) {
+                    setSystemStatus({
+                        online: true,
+                        mode: response.mode || 'ONLINE',
+                        dbStatus: response.db_status,
+                        message: `System Online (${response.mode || 'Server'} Mode${response.db_status ? ` - DB: ${response.db_status}` : ''})`
+                    });
+                }
+            } catch (err) {
+                setSystemStatus({
+                    online: false,
+                    message: 'Backend Unreachable'
+                });
+            }
+        };
+
+        checkStatus();
+        const interval = setInterval(checkStatus, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,6 +65,30 @@ function Login() {
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <Shield size={48} color="var(--color-primary-600)" />
                     <h1 style={{ marginTop: '1rem' }}>Procurement Monitor</h1>
+
+                    {systemStatus.message && (
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            marginTop: '0.5rem',
+                            padding: '4px 12px',
+                            background: systemStatus.online ? 'var(--color-success-50)' : 'var(--color-danger-50)',
+                            color: systemStatus.online ? 'var(--color-success-700)' : 'var(--color-danger-700)',
+                            borderRadius: '999px',
+                            fontSize: '0.75rem',
+                            fontWeight: '500'
+                        }}>
+                            <div style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: systemStatus.online ? 'var(--color-success-500)' : 'var(--color-danger-500)',
+                                marginRight: '8px'
+                            }}></div>
+                            {systemStatus.message}
+                        </div>
+                    )}
+
                     <p style={{ color: 'var(--color-gray-500)', marginTop: '0.5rem' }}>
                         Transparency Dashboard Login
                     </p>

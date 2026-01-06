@@ -22,6 +22,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
+const mongoose = require('mongoose');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -79,8 +80,18 @@ app.use((req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const statusMap = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+
     res.json({
-        status: 'healthy',
+        status: dbState === 1 ? 'healthy' : 'degraded',
+        mode: 'REAL',
+        db_status: statusMap[dbState] || 'unknown',
         timestamp: new Date().toISOString(),
         disclaimer: 'This system does NOT determine corruption. It highlights abnormal procurement patterns for human review.'
     });
@@ -100,6 +111,9 @@ app.use('/api/risk', riskRoutes);
 
 // Dashboard routes
 app.use('/api/dashboard', dashboardRoutes);
+
+// Upload routes
+app.use('/api/upload', require('./routes/upload'));
 
 // ============================================
 // BLOCK DANGEROUS METHODS AT APP LEVEL

@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
-import { Shield, BarChart3, FileText, Users, Building, AlertTriangle, CheckCircle, LogOut, Menu } from 'lucide-react';
+import { Shield, LayoutDashboard, Building2, Users, FileText, CheckCircle, AlertOctagon, LogOut, Upload as UploadIcon } from 'lucide-react';
 import { authAPI } from './services/api';
 
 // Components
@@ -20,7 +20,9 @@ import Suppliers from './components/Suppliers';
 import LedgerVerification from './components/LedgerVerification';
 import RiskRules from './components/RiskRules';
 import PublicView from './components/PublicView';
+import Upload from './components/Upload';
 import Login from './components/Login';
+import FileUpload from './components/FileUpload';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -41,7 +43,21 @@ function AuthProvider({ children }) {
 
     const login = async (username, password) => {
         const result = await authAPI.login(username, password);
-        setUser(result.data.user);
+
+        // Support both shapes:
+        // 1) axios-style: result.data = { success, data: { user, token } }
+        // 2) older/alternate: result.data = { user }
+        const userFromResponse =
+            result?.data?.data?.user ??
+            result?.data?.user ??
+            result?.data?.data ??
+            null;
+
+        if (!userFromResponse) {
+            throw new Error('Login succeeded but user payload was missing.');
+        }
+
+        setUser(userFromResponse);
         return result;
     };
 
@@ -99,6 +115,14 @@ function Header() {
                     <>
                         <nav className="header-nav">
                             <Link to="/">Dashboard</Link>
+
+                            {user.role === 'AUDITOR' && (
+                                <Link to="/upload" className="flex items-center">
+                                    <UploadIcon size={16} className="mr-1" />
+                                    Upload
+                                </Link>
+                            )}
+
                             <Link to="/departments">Departments</Link>
                             <Link to="/suppliers">Suppliers</Link>
                             <Link to="/verify">Verify Ledger</Link>
@@ -175,7 +199,14 @@ function App() {
             <AuthProvider>
                 <Routes>
                     {/* Public Routes */}
-                    <Route path="/login" element={<Login />} />
+                    <Route
+                        path="/login"
+                        element={
+                            <LoginRedirectGuard>
+                                <Login />
+                            </LoginRedirectGuard>
+                        }
+                    />
                     <Route path="/public" element={<PublicView />} />
 
                     {/* Protected Routes */}
@@ -227,12 +258,45 @@ function App() {
                         </ProtectedRoute>
                     } />
 
+                    <Route path="/upload" element={
+                        <ProtectedRoute>
+                            <RoleGuard allowedRoles={['AUDITOR']}>
+                                <AppLayout>
+                                    <Upload />
+                                </AppLayout>
+                            </RoleGuard>
+                        </ProtectedRoute>
+                    } />
+
+
+
                     {/* Fallback */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
     );
+}
+
+// Role Guard Component
+function RoleGuard({ children, allowedRoles }) {
+    const { user, loading } = useAuth();
+
+    if (loading) return null;
+
+    if (!user || !allowedRoles.includes(user.role)) {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
+}
+
+// Redirect authenticated users away from /login
+function LoginRedirectGuard({ children }) {
+    const { user, loading } = useAuth();
+    if (loading) return null;
+    if (user) return <Navigate to="/" replace />;
+    return children;
 }
 
 export default App;
