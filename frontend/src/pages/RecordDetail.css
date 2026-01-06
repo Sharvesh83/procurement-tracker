@@ -1,0 +1,181 @@
+.detail-container {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--outline-variant);
+    padding-bottom: 24px;
+}
+
+.tender-id-label {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-surface);
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-badge.high {
+    background: #FFEBEE;
+    color: #D50000;
+}
+
+.status-badge.medium {
+    background: #FFF8E1;
+    color: #FF6F00;
+}
+
+.status-badge.low {
+    background: #E8F5E9;
+    color: #1B5E20;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 3fr 2fr;
+    }
+}
+
+.info-card {
+    background: var(--surface-container-low);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: var(--elevation-1);
+}
+
+.info-card h2 {
+    font-size: 1.25rem;
+    color: var(--on-surface);
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--outline-variant);
+    padding-bottom: 12px;
+}
+
+.field-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.field {
+    flex: 1;
+}
+
+.field label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    margin-bottom: 8px;
+}
+
+.field span {
+    font-size: 1rem;
+    color: var(--on-surface);
+    font-weight: 500;
+}
+
+.field.full {
+    width: 100%;
+}
+
+.amount {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: var(--primary) !important;
+}
+
+/* Risk Card */
+.risk-analysis {
+    background: var(--surface-container);
+}
+
+.high-risk-border {
+    border: 2px solid #D50000;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Stripe effect specifically for this container */
+.high-risk-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(45deg, #D50000, #D50000 10px, #FFEBEE 10px, #FFEBEE 20px);
+}
+
+.safe-state {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--primary);
+}
+
+.safe-state p {
+    margin-top: 16px;
+    color: var(--on-surface-variant);
+}
+
+.flags-section {
+    margin-bottom: 24px;
+}
+
+.flags-section h3,
+.explanation-section h3 {
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.flags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.flag-chip {
+    background: #FFEBEE;
+    color: #D50000;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid #FFCDD2;
+}
+
+.explanation-text {
+    line-height: 1.6;
+    color: var(--on-surface);
+}

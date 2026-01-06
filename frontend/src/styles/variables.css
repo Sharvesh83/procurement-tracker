@@ -1,0 +1,57 @@
+:root {
+    /* Breakpoints */
+    --mobile-breakpoint: 640px;
+    --tablet-breakpoint: 1024px;
+    --desktop-breakpoint: 1440px;
+
+    /* Spacing System */
+    --space-2xs: 4px;
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+
+    /* Md Sys Color Surface */
+    --md-sys-color-surface: #FDFBFF;
+    --md-sys-color-on-surface: #1A1C1E;
+    --md-sys-color-surface-container-low: #F3F3F6;
+    /* Slightly darker than pure white for cards */
+    --md-sys-color-surface-variant: #E0E2EC;
+    --md-sys-color-on-surface-variant: #43474E;
+    --md-sys-color-outline-variant: #C3C7CF;
+    --md-sys-color-background: #FDFBFF;
+
+    /* Primary & Secondary */
+    --md-sys-color-primary: #2563EB;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-secondary-container: #DCE2F9;
+    --md-sys-color-on-secondary-container: #101F4B;
+
+    /* Typography Scale (Material 3 Inspired) */
+    --font-display-large: 57px;
+    --font-display-medium: 45px;
+    --font-display-small: 36px;
+    --font-headline-large: 32px;
+    --font-headline-medium: 28px;
+    --font-headline-small: 24px;
+    --font-title-large: 22px;
+    --font-title-medium: 16px;
+    --font-title-small: 14px;
+    --font-body-large: 16px;
+    --font-body-medium: 14px;
+    --font-body-small: 12px;
+
+    /* Shapes */
+    --md-sys-shape-corner-full: 9999px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-small: 8px;
+
+    /* Elevations */
+    --elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.08), 0px 1px 5px rgba(0, 0, 0, 0.05);
+    --elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.12), 0px 2px 8px rgba(0, 0, 0, 0.08);
+    --elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+}

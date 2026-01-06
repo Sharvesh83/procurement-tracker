@@ -1,0 +1,32 @@
+[
+    {
+        "awarded_amt": 50000000,
+        "tender_detail_status": "Completed",
+        "vendor": "MegaCorp",
+        "department": "Transport"
+    },
+    {
+        "awarded_amt": 5000,
+        "tender_detail_status": "Cancelled",
+        "vendor": "SmallBiz",
+        "department": "Health"
+    },
+    {
+        "awarded_amt": 1200000,
+        "tender_detail_status": "Completed",
+        "vendor": "MidCorp",
+        "department": "Transport"
+    },
+    {
+        "awarded_amt": 1000,
+        "tender_detail_status": "Completed",
+        "vendor": "TinyBiz",
+        "department": "Education"
+    },
+    {
+        "awarded_amt": 50000,
+        "tender_detail_status": "Completed",
+        "vendor": "MidCorp",
+        "department": "Education"
+    }
+]

@@ -1,0 +1,81 @@
+/* Main App Shell */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--md-sys-color-background);
+}
+
+.app-body {
+    display: flex;
+    flex: 1;
+    position: relative;
+    width: 100%;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    padding: var(--space-lg);
+    overflow-y: auto;
+    width: 100%;
+    /* Max width constraint only for very large screens to avoid stretching */
+    max-width: 1600px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+/* Responsive NavRail Logic */
+@media (max-width: 768px) {
+    .main-content {
+        padding: var(--space-md);
+    }
+
+    .nav-rail {
+        position: absolute;
+        z-index: 100;
+        /* Higher than content */
+        height: 100%;
+        box-shadow: var(--elevation-2);
+    }
+
+    .nav-rail.closed {
+        transform: translateX(-100%);
+        width: 280px;
+        /* Keep width but hide */
+        border: none;
+    }
+
+    .nav-rail.open {
+        transform: translateX(0);
+        box-shadow: var(--elevation-3);
+    }
+}
+
+/* Backdrop: Hidden by default (Desktop) */
+.nav-backdrop {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    /* Backdrop for mobile drawer */
+    .nav-backdrop {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 90;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .nav-backdrop.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
